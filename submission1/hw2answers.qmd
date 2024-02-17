@@ -87,8 +87,8 @@ est.prices
 
 \newpage
 \noindent 5. Calculate the average price among penalized versus non-penalized hospitals. <br>
-Average price among penalized: `r format(mean.pen, big.mark=",")` 
-Average price among non-penalized: `r format(mean.nopen, big.mark=",")` 
+Average price among penalized: `r format(mean.pen, big.mark=",")` <br>
+Average price among non-penalized: `r format(mean.nopen, big.mark=",")` <br>
 
 
 \newpage
@@ -119,6 +119,6 @@ knitr::kable(quartile_price_summary,
 \newpage
 \noindent 10. Briefly describe your experience working with these data (just a few sentences). Tell me one thing you learned and one thing that really aggravated or surprised you. <br>
  
-This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups.
-I learned 
+This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups.<br>
+I learned <br>
 One thing that aggravated me was figuring out how to call all the variables/graphs/tables into the Quarto document. It took a lot of time to figure out how to correctly call them.  
