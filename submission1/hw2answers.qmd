@@ -1,0 +1,120 @@
+---
+title: "Homework 2"
+author: "Kendall Pollard"
+format:
+  pdf:
+    output-file: "pollard-k-hwk2-1"
+    output-ext:  "pdf"
+    header-includes:
+      - \usepackage{float}
+      - \floatplacement{table}{H}
+---
+
+
+```{r}
+#| include: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, fixest,
+               scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
+               ggrepel, survey, foreign, devtools, pdftools, kableExtra, modelsummary,
+               kableExtra)
+```
+
+
+
+```{r}
+#| include: false
+#| eval: true
+load("Hw2_workspace.Rdata")
+```
+
+Here is the link to my GitHub Repository: 
+
+Here are my answers for Homework 2. I do the coding in a separate `R` script, but here is the cleaned-up version. I run the analysis separately, save the workspace with only the summary stats, figures, and tables that I need, and then load the workspace in the final qmd. My analysis file with answers and code to all the questions is available in the analysis folder. 
+
+\newpage
+# Duplicate Report 
+
+\vspace{.2in}
+\noindent 1. How many hospitals filed more than one report in the same year?<br>
+
+The answer to quesiton 1 is
+
+```{r}
+#| echo: false
+#| label: multreports
+#| fig-cap: "Hosptials with Mult Reports"
+
+hospitals_multreports
+```
+
+
+\newpage
+\noindent 2. After removing/combining multiple reports, how many unique hospital IDs (Medicare provider numbers) exist in the data? <br>
+
+The answer for question 2 is `r format(num_unique_hospital_ids, big.mark=",")` 
+
+
+\newpage
+\noindent 3. What is the distribution of total charges (tot_charges in the data) in each year? Show your results with a “violin” plot, with charges on the y-axis and years on the x-axis.<br>
+```{r}
+#| echo: false
+#| label: total-charges
+#| fig-cap: totalcharges
+
+tot.charges
+```
+
+\newpage
+\noindent 4. What is the distribution of estimated prices in each year? <br>
+
+I used the equation from class and filtered outliers/negative prices by removing prices lower than 0 and setting a custom upper limit. 
+
+```{r}
+#| echo: false
+#| label: total-charges
+#| fig-cap: totalcharges
+
+est.prices
+
+```
+
+
+\newpage
+\noindent 5. Calculate the average price among penalized versus non-penalized hospitals. <br>
+Average price among penalized: `r format(mean.pen, big.mark=",")` 
+Average price among non-penalized: `r format(mean.nopen, big.mark=",")` 
+
+
+\newpage
+\noindent 6. Split hospitals into quartiles based on bed size. To do this, create 4 new indicator variables, where each variable is set to 1 if the hospital’s bed size falls into the relevant quartile. Provide a table of the average price among treated/control groups for each quartile
+
+```{r} 
+#| echo: false
+#| label: 1
+#| tbl-cap: "Bed size quartlies"
+
+options(knitr.kable.NA = 0)
+knitr::kable(quartile_price_summary, 
+             col.names=c("Quartile","Penalized", "Non-Penalized"),
+             format.args=list(big.mark=","), booktabs = TRUE) %>%
+             kable_styling(latex_options=c("scale_down"))
+
+```
+
+\newpage
+\noindent 7. Find the average treatment effect using each of the following estimators, and present your results in a single table: <br>
+
+\newpage
+\noindent 8. With these different treatment effect estimators, are the results similar, identical, very different? <br>
+
+\newpage
+\noindent 9. Do you think you’ve estimated a causal effect of the penalty? Why or why not? (just a couple of sentences) <br>
+
+\newpage
+\noindent 10. Briefly describe your experience working with these data (just a few sentences). Tell me one thing you learned and one thing that really aggravated or surprised you. <br>
+ 
+This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups.
+I learned 
+One thing that aggravated me was figuring out how to call all the variables/graphs/tables into the Quarto document. It took a lot of time to figure out how to correctly call them.  
