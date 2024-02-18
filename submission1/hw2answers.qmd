@@ -110,6 +110,19 @@ knitr::kable(quartile_price_summary,
 \newpage
 \noindent 7. Find the average treatment effect using each of the following estimators, and present your results in a single table: <br>
 
+```{r} 
+#| echo: false
+#| label: ATE
+#| tbl-cap: "ATE 4 different ways"
+
+options(knitr.kable.NA = 0)
+knitr::kable(results_table, 
+             col.names=c("Blank","Estimator", "ATE"),
+             format.args=list(big.mark=","), booktabs = TRUE) %>%
+             kable_styling(latex_options=c("scale_down"))
+
+```
+
 \newpage
 \noindent 8. With these different treatment effect estimators, are the results similar, identical, very different? <br>
 
