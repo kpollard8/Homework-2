@@ -44,7 +44,7 @@ The answer to quesiton 1 is
 ```{r}
 #| echo: false
 #| label: multreports
-#| fig-cap: "Hosptials with Mult Reports"
+#| fig-cap: "Hospitals with Mult Reports"
 
 hospitals_multreports
 ```

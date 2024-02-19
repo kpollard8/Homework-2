@@ -15,7 +15,6 @@ install.packages("Matching")
 #read in data 
 final.hcris.v1996=read_rds('data/output/HCRIS_Data_v1996.rds')
 final.hcris.v2010=read_rds('data/output/HCRIS_Data_v2010.rds')
-final.hcris.data=read_rds('data/output/HCRIS_Data.rds')
 
 ## create missing variables for columns introduced in v2010 of hcris forms
 final.hcris.v1996 = final.hcris.v1996 %>%
@@ -78,19 +77,11 @@ hospital_counts <- duplicate.hcris %>%
 
 #Question 2: After removing/combining multiple reports - how many unique hospital IDs (Medicare provider numbers) exist in the data?
 
-#option 1 - table form for some reason 
-  # Count the number of unique hospital IDs
-unique_hospital_count <- final.hcris.data %>%
-  summarise(num_unique_hospitals = n_distinct(provider_number))
+final.hcris.data=read_rds('data/output/HCRIS_Data.rds') 
 
-# Display the result
-print(unique_hospital_count$num_unique_hospitals)
-
-#option 2: just the number 
 ## Calculate the number of unique hospital IDs
 library(dplyr)
-num_unique_hospital_ids <- final.hcris.data %>%
-  distinct(provider_number) %>%
+num_unique_hospital_ids <- final.hcris.data %>% distinct(provider_number) %>%
   nrow()
 
 # Print the result
