@@ -11,6 +11,7 @@ if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate)
 
 install.packages("Matching")
+install.packages("cobalt")
 
 #read in data 
 final.hcris.v1996=read_rds('data/output/HCRIS_Data_v1996.rds')
@@ -177,50 +178,38 @@ print(quartile_price_summary)
 
 #Question 7 Find the average treatment effect using each of the following estimators, and present your results in a single table
 
-#nearest neighbor inverse variance
-lp.vars <- final.hcris %>% ungroup() %>% 
-  select(beds, mcaid_discharges, penalty, ip_charges, 
-         mcare_discharges, tot_mcare_payment, price)
+#Answer Question 7:
+lp.vars <- final.hcris %>% 
+  dplyr::select(beds, quartile_1, quartile_2, penalty, quartile_3, 
+         quartile_4, price) %>%
+  dplyr::filter(complete.cases(.))
+lp.covs <- lp.vars %>% dplyr::select(-c("penalty","price"))
 
-lp.covs2 <- final.hcris %>% ungroup() %>% 
-  select(quartile)
 
+v.name=data.frame(new=c("Beds","Quartile 1", "Penalty", "Quartile 2",
+                   "Quartile 3", "Quartile 4", "Price"))
 
+# Part 1: Nearest Neighbor Matching (Inverse Variance Distance)
 m.nn.var2 <- Matching::Match(Y=lp.vars$price,
                              Tr=lp.vars$penalty,
-                             X=lp.covs2,
+                             X=lp.covs,
                              M=1,   #<<
                              Weight=1,
                              estimand="ATE")
-                            
-                        
-# Extract the ATE value from the matching result
-ate_nn_var2 <- m.nn.var2$estimates$ate
+                             
 
-# Print the ATE
-cat("Average Treatment Effect (ATE) using Nearest Neighbor Matching with inverse variance:", ate_nn_var2, "\n")
-
-# nearest neighbor Mahalanobis distance
+#Part 2: Nearest neighbor matching (1-to-1) with Mahalanobis distance
 m.nn.md <- Matching::Match(Y=lp.vars$price,
                            Tr=lp.vars$penalty,
-                           X=lp.covs2,
+                           X=lp.covs,
                            M=1,
                            Weight=2,
-                           estimand="ATE")     
-
-ate_nn_md <- m.nn.md$estimates$ate
-
-# Print the ATE
-cat("Average Treatment Effect (ATE) using Nearest Neighbor Matching with Mahalanobis:", ate_nn_md, "\n")
-
-v.name=data.frame(new=c("Beds","Medicaid Discharges", "Inaptient Charges",
-                   "Medicare Discharges", "Medicare Payments"))
+                           estimand="ATE")                           
 
 
-
-
-#Inverse propensity weighting
-logit.model <- glm(penalty ~ beds, family=binomial, data=lp.vars)
+#Part 3: Inverse propensity weighting
+logit.model <- glm(penalty ~ beds + quartile_1 + quartile_2 + quartile_3 + 
+         quartile_4 + price, family=binomial, data=lp.vars)
 ps <- fitted(logit.model)
 m.nn.ps <- Matching::Match(Y=lp.vars$price,
                            Tr=lp.vars$penalty,
@@ -228,84 +217,35 @@ m.nn.ps <- Matching::Match(Y=lp.vars$price,
                            M=1,
                            estimand="ATE")
 
-lp.vars <- lp.vars %>%
-  mutate(ipw = case_when(
-    penalty==1 ~ 1/ps,
-    penalty==0 ~ 1/(1-ps),
-    TRUE ~ NA_real_
-  ))
-mean.t1 <- lp.vars %>% filter(penalty==1) %>%
-  select(price, ipw) %>% summarize(mean_p=weighted.mean(price,w=ipw))
-mean.t0 <- lp.vars %>% filter(penalty==0) %>%
-  select(price, ipw) %>% summarize(mean_p=weighted.mean(price,w=ipw))
-mean.t1$mean_p - mean.t0$mean_p
 
-#Simple linear regression
-ipw.reg <- lm(price ~ penalty, data=lp.vars, weights=ipw)
-summary(ipw.reg)
+#Part 4: Simple linear regression 
+reg.dat <- lp.vars %>% ungroup() %>% filter(complete.cases(.)) %>%
+  mutate(beds_diff = penalty*(beds - mean(beds)))
+reg <- lm(price ~ penalty + beds + quartile_1 + quartile_2 + quartile_3 + quartile_4 + 
+            beds_diff,
+          data=reg.dat)
+summary(reg)
 
-#single table 
-# Define a function to calculate the ATE for each estimator
-calculate_ate <- function(matching_result, weights = NULL) {
-  if (is.null(weights)) {
-    ate <- matching_result$estimates$ate
-  } else {
-    ate <- weighted.mean(lp.vars$price * lp.vars$penalty, w = weights) -
-           weighted.mean(lp.vars$price * (1 - lp.vars$penalty), w = weights)
-  }
-  return(ate)
-}
+library(cobalt)
+# Extract ATE estimates
+ATE_nn_var <- bal.tab(m.nn.var2, covs = lp.covs, treat = lp.vars$penalty)$ATE
+ATE_nn_md <- bal.tab(m.nn.md, covs = lp.covs, treat = lp.vars$penalty)$ATE
+ATE_nn_ps <- bal.tab(m.nn.ps, covs = lp.covs, treat = lp.vars$penalty)$ATE
+ATE_reg <- coef(summary(reg))["penaltyTRUE", "Estimate"]
 
-# Create a data frame to store the results
+# Create a data frame for the results
 results_table <- data.frame(
-  Estimator = character(),
-  ATE = numeric()
+  Estimator = c("Nearest Neighbor (Inverse Variance Distance)", 
+                "Nearest Neighbor (Mahalanobis Distance)", 
+                "Inverse Propensity Weighting", 
+                "Simple Linear Regression"),
+  ATE = c(ATE_nn_var, ATE_nn_md, ATE_nn_ps, ATE_reg)
 )
-
-# Nearest neighbor inverse variance
-if (!is.null(m.nn.var2$estimates$ate)) {
-  results_table <- rbind(results_table, 
-                         data.frame(
-                           Estimator = "Nearest Neighbor Inverse Variance",
-                           ATE = calculate_ate(m.nn.var2)
-                         ))
-} else {
-  print("Nearest Neighbor Inverse Variance: Matching did not converge.")
-}
-
-# Nearest neighbor Mahalanobis distance
-if (!is.null(m.nn.md$estimates$ate)) {
-  results_table <- rbind(results_table, 
-                         data.frame(
-                           Estimator = "Nearest Neighbor Mahalanobis Distance",
-                           ATE = calculate_ate(m.nn.md)
-                         ))
-} else {
-  print("Nearest Neighbor Mahalanobis Distance: Matching did not converge.")
-}
-
-# Inverse propensity weighting
-if (!is.null(m.nn.ps$estimates$ate)) {
-  results_table <- rbind(results_table, 
-                         data.frame(
-                           Estimator = "Inverse Propensity Weighting",
-                           ATE = calculate_ate(m.nn.ps, weights = lp.vars$ipw)
-                         ))
-} else {
-  print("Inverse Propensity Weighting: Matching did not converge.")
-}
-
-# Simple linear regression
-results_table <- rbind(results_table, 
-                       data.frame(
-                         Estimator = "Simple Linear Regression",
-                         ATE = coef(ipw.reg)[2]
-                       ))
-
 # Print the results table
 print(results_table)
 
 
+
 rm(list=c("final.hcris.data", "final.hcris.v1996","final.hcris.v2010","unique.hcris1",
 "unique.hcris2","unique.hcris3", "unique.hcris4", "duplicate.hcris","duplicate.hcris1", "duplicate.hcris2", "duplicate.hcris3", "final.hcris"))
-save.image("submission1/Hw2_workspace.Rdata")
+save.image("submission2/Hw2_workspace1.Rdata")

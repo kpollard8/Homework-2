@@ -3,7 +3,7 @@ title: "Homework 2"
 author: "Kendall Pollard"
 format:
   pdf:
-    output-file: "pollard-k-hwk2-1"
+    output-file: "pollard-k-hwk2-2"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
@@ -22,11 +22,15 @@ pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, 
 ```
 
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE)
+```
+
 
 ```{r}
 #| include: false
 #| eval: true
-load("Hw2_workspace.Rdata")
+load("Hw2_workspace1.Rdata")
 ```
 
 Here is the link to my GitHub Repository: https://github.com/kpollard8/Homework-2
@@ -53,15 +57,12 @@ hospitals_multreports
 \newpage
 \noindent 2. After removing/combining multiple reports, how many unique hospital IDs (Medicare provider numbers) exist in the data? <br>
 
-The answer for question 2 is
-
-```{r}
-num_unique_hospital_ids
-```
+The answer for question 2 is `r format(num_unique_hospital_ids, big.mark=",")` <br>
 
 
 \newpage
 \noindent 3. What is the distribution of total charges (tot_charges in the data) in each year? Show your results with a “violin” plot, with charges on the y-axis and years on the x-axis.<br>
+
 ```{r}
 #| echo: false
 #| label: total-charges
@@ -87,7 +88,9 @@ est.prices
 
 \newpage
 \noindent 5. Calculate the average price among penalized versus non-penalized hospitals. <br>
+
 Average price among penalized: `r format(mean.pen, big.mark=",")` <br>
+
 Average price among non-penalized: `r format(mean.nopen, big.mark=",")` <br>
 
 
@@ -99,6 +102,7 @@ Average price among non-penalized: `r format(mean.nopen, big.mark=",")` <br>
 #| label: beds
 #| tbl-cap: "Bed size quartlies"
 
+library(kableExtra)
 options(knitr.kable.NA = 0)
 knitr::kable(quartile_price_summary, 
              col.names=c("Quartile","Penalized", "Non-Penalized"),
@@ -110,21 +114,16 @@ knitr::kable(quartile_price_summary,
 \newpage
 \noindent 7. Find the average treatment effect using each of the following estimators, and present your results in a single table: <br>
 
-In this first attempt, the ATE for the first three estimators is not working. I am running into errors with the matching, where the error said User
-                            estimand="ATE"
-Error in Matching::MatchY = lp.vars$price, Tr = lp.vars$penalty, X = lp.covs2,  : 
-  length(Tr) != nrow(X)
-When I tried to fix it, I coded it so that it would tell me if it was "null" before even trying to match it. That happened for all 3 estimators. Also, I used "beds" as the x, but then I thought I should do it by qaurtile_1, 2, 3, 4, and neither seemed to work. 
-I was able to do the simple linear regression for some reason, so the table only shows that. 
 > 
 ```{r} 
 #| echo: false
 #| label: ATE
 #| tbl-cap: "ATE 4 different ways"
 
+library(kableExtra)
 options(knitr.kable.NA = 0)
 knitr::kable(results_table, 
-             col.names=c("Blank","Estimator", "ATE"),
+             col.names=c("Estimator", "ATE"),
              format.args=list(big.mark=","), booktabs = TRUE) %>%
              kable_styling(latex_options=c("scale_down"))
 
@@ -132,15 +131,19 @@ knitr::kable(results_table,
 
 \newpage
 \noindent 8. With these different treatment effect estimators, are the results similar, identical, very different? <br>
-If the numbers align once I'm able to correctly do the ATEs for all estimators, then the results should be similar. Because they are all using different types of estimators, they are not going to be identical, but my hypothesis is that they would be similar. 
+
+The numbers are all identical. This means that even with these different esitmators, the ATE is clearly around 190. This outcome is interesting because that means that all these estimators measured the exact same ATE, although I hypothesized that they would be similar with some variance.  
+
 
 \newpage
 \noindent 9. Do you think you’ve estimated a causal effect of the penalty? Why or why not? (just a couple of sentences) <br>
-I don't think we have established a causal effect because we are using various estimators to find an average treatment effect, not necessarily a causal effect. With ATEs that are statistically significant, we can say there is very high correlation/association, but still it's difficult to say it was directly causal. 
+
+I don't think we have established a causal effect because we are using various estimators to find an average treatment effect, not necessarily a causal effect. With ATEs that are statistically significant, we can say there is very high correlation/association, but still it's difficult to say it was directly causal. However, now that all the ATEs are the exact same, I'm wondering if we can say a causal effect because it has been reinforced 4 times. 
 
 \newpage
 \noindent 10. Briefly describe your experience working with these data (just a few sentences). Tell me one thing you learned and one thing that really aggravated or surprised you. <br>
  
-This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups.<br>
+This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups. In the second attempt, moving from submission 1 to submission 2 was a little challenging with making sure my Quarto documents and the workspaces they were accessing were aligned. <br>
+
 I learned how to create violin plots which were not as hard as I thought they'd be. <br>
 One thing that aggravated me was figuring out how to call all the variables/graphs/tables into the Quarto document. It took a lot of time to figure out how to correctly call them.  
