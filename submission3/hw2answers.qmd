@@ -3,7 +3,7 @@ title: "Homework 2"
 author: "Kendall Pollard"
 format:
   pdf:
-    output-file: "pollard-k-hwk2-2"
+    output-file: "pollard-k-hwk2-3"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
@@ -81,7 +81,7 @@ I used the equation from class and filtered outliers/negative prices by removing
 #| label: prices
 #| fig-cap: prices
 
-est.prices
+question4_plot
 
 ```
 
@@ -138,7 +138,8 @@ The numbers are all identical. This means that even with these different esitmat
 \newpage
 \noindent 9. Do you think you’ve estimated a causal effect of the penalty? Why or why not? (just a couple of sentences) <br>
 
-I don't think we have established a causal effect because we are using various estimators to find an average treatment effect, not necessarily a causal effect. With ATEs that are statistically significant, we can say there is very high correlation/association, but still it's difficult to say it was directly causal. However, now that all the ATEs are the exact same, I'm wondering if we can say a causal effect because it has been reinforced 4 times. 
+I don't think we have established a causal effect because it is just bed size; hosptials of the same bed size could have differing other variables 
+we are using various estimators to find an average treatment effect, not necessarily a causal effect. With ATEs that are statistically significant, we can say there is very high correlation/association, but still it's difficult to say it was directly causal. However, now that all the ATEs are the exact same, I'm wondering if we can say a causal effect because it has been reinforced 4 times. 
 
 \newpage
 \noindent 10. Briefly describe your experience working with these data (just a few sentences). Tell me one thing you learned and one thing that really aggravated or surprised you. <br>

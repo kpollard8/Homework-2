@@ -90,27 +90,40 @@ print(num_unique_hospital_ids)
 
 # ungrouping 
 final.hcris.data <- final.hcris.data %>% ungroup()
+
 #Question 3: What is the distribution of total charges (tot_charges in the data) in each year? Show your results with a “violin” plot, with charges on the y-axis and years on the x-axis
+
+# Calculate the lower and upper quantiles
+lower_quantile <- quantile(final.hcris.data$tot_charges, 0.01)
+upper_quantile <- quantile(final.hcris.data$tot_charges, 0.99)
+
+# Filter the data to keep values within the 1% to 99% range
+final.hcris.data <- final.hcris.data %>%
+  filter(tot_charges >= lower_quantile, tot_charges <= upper_quantile)
 
 library(ggplot2)
 library(scales)
 
 # Define the custom upper limit for the y-axis
-custom_upper_limit <- 3000000000 
+custom_upper_limit <- 3000
 
-tot.charges <- ggplot(final.hcris.data, aes(x = year, y = tot_charges)) +
+# dividing by 1000000 to show the y axis in total charges scaled 
+tot.charges <- ggplot(final.hcris.data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
   geom_violin() +
   labs(title = "Distribution of Total Charges by Year",
        x = "Year",
-       y = "Total Charges") +
+       y = "Total Charges in Millions of Dollars") +
   theme_minimal() + 
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE), limits = c(0, custom_upper_limit))
 
 print(tot.charges)
 
 
+
+
 #Question 4: What is the distribution of estimated prices in each year? 
 # Calculate estimated price using the provided formula
+
 final.hcris.data <- final.hcris.data %>%
   mutate(
     discount_factor = 1 - tot_discounts / tot_charges,
@@ -119,20 +132,24 @@ final.hcris.data <- final.hcris.data %>%
     price = price_num / price_denom
   )
 
-# Filter out negative prices and potential outliers
-final.hcris.data <- final.hcris.data %>%
-  filter(price >= 0)  # Filter out negative prices
+# Filter out negative prices and extreme outliers and add penalty data
+final.hcris.data <- final.hcris.data %>% ungroup() %>%
+  filter(year != 2007, price_denom>100, !is.na(price_denom), 
+         price_num>0, !is.na(price_num),
+         price<100000, 
+         beds>30) %>%  
+  mutate( hvbp_payment = ifelse(is.na(hvbp_payment),0,hvbp_payment),
+          hrrp_payment = ifelse(is.na(hrrp_payment),0,abs(hrrp_payment)),
+          penalty = (hvbp_payment-hrrp_payment<0))
 
-# Create the violin plot
-custom_upper_limit <- 65000
-est.prices <- ggplot(final.hcris.data, aes(x = year, y = price)) +
-  geom_violin(trim = TRUE) +  # Adjust the `trim` parameter as needed
-  labs(title = "Distribution of Estimated Prices by Year",
-       x = "Year",
-       y = "Estimated Price") +
-  theme_minimal() +
-  ylim(0, custom_upper_limit)  # Set custom upper limit for y-axis
-print(est.prices)
+# Create violin plot
+question4_plot <- ggplot(final.hcris.data, aes(x = as.factor(year), y = price)) +
+  geom_violin(trim = FALSE) +
+  labs(x = "Year", y = "Estimated Price") +
+  ggtitle("Distribution of Estimated Prices by Year") +
+  theme_minimal()
+
+question4_plot
 
 #Question 5: 
 
