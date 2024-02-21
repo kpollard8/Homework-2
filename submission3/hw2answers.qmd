@@ -30,7 +30,7 @@ knitr::opts_chunk$set(warning = FALSE)
 ```{r}
 #| include: false
 #| eval: true
-load("Hw2_workspace1.Rdata")
+load("Hw2_workspace.Rdata")
 ```
 
 Here is the link to my GitHub Repository: https://github.com/kpollard8/Homework-2
@@ -50,7 +50,7 @@ The answer to quesiton 1 is
 #| label: multreports
 #| fig-cap: "Hospitals with Mult Reports"
 
-hospitals_multreports
+Q1
 ```
 
 

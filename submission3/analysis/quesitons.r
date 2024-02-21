@@ -76,6 +76,28 @@ hospital_counts <- duplicate.hcris %>%
   theme_minimal()
   print(hospitals_multreports)
 
+# by fiscal year 
+## Answer Question 1: How many hospitals filed more than one report in the same year? Show your answer as a line graph of the number of hospitals over time.
+
+# Count the number of hospitals that filed more than one report in the same year
+num_hospitals_multiple_reports = duplicate.hcris %>% 
+  summarise(num_hospitals = n_distinct(provider_number))
+
+print(num_hospitals_multiple_reports)
+
+# Create summary data frame
+hospitals_over_time = duplicate.hcris %>%
+  group_by(fyear) %>%
+  summarise(num_hospitals = n_distinct(provider_number))
+
+# Plot line graph
+Q1 <- ggplot(hospitals_over_time, aes(x = fyear, y = num_hospitals)) +
+  geom_line() +
+  labs(x = "Fiscal Year", y = "Number of Hospitals", 
+       title = "Number of Hospitals Filing More Than One Report Over Time")
+print(Q1)
+
+
 #Question 2: After removing/combining multiple reports - how many unique hospital IDs (Medicare provider numbers) exist in the data?
 
 final.hcris.data=read_rds('data/output/HCRIS_Data.rds') 
@@ -93,14 +115,6 @@ final.hcris.data <- final.hcris.data %>% ungroup()
 
 #Question 3: What is the distribution of total charges (tot_charges in the data) in each year? Show your results with a “violin” plot, with charges on the y-axis and years on the x-axis
 
-# Calculate the lower and upper quantiles
-lower_quantile <- quantile(final.hcris.data$tot_charges, 0.01)
-upper_quantile <- quantile(final.hcris.data$tot_charges, 0.99)
-
-# Filter the data to keep values within the 1% to 99% range
-final.hcris.data <- final.hcris.data %>%
-  filter(tot_charges >= lower_quantile, tot_charges <= upper_quantile)
-
 library(ggplot2)
 library(scales)
 
@@ -109,6 +123,24 @@ custom_upper_limit <- 3000
 
 # dividing by 1000000 to show the y axis in total charges scaled 
 tot.charges <- ggplot(final.hcris.data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
+  geom_violin() +
+  labs(title = "Distribution of Total Charges by Year",
+       x = "Year",
+       y = "Total Charges in Millions of Dollars") +
+  theme_minimal() + 
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE), limits = c(0, custom_upper_limit))
+
+print(tot.charges)
+
+# Define the custom upper limit for the y-axis
+custom_upper_limit <- 3000
+
+# Filter out data for the year 2007
+filtered_data <- final.hcris.data %>%
+  filter(year != 2007)
+
+# Create the ggplot with the filtered data
+tot.charges <- ggplot(filtered_data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
   geom_violin() +
   labs(title = "Distribution of Total Charges by Year",
        x = "Year",
