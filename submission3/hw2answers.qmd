@@ -43,7 +43,7 @@ Here are my answers for Homework 2. I do the coding in a separate `R` script, bu
 \vspace{.2in}
 \noindent 1. How many hospitals filed more than one report in the same year?<br>
 
-The answer to quesiton 1 is
+I originally answered this question filtering by year instead of fiscal year, but I think since everything else is filtered by fiscal year, it makes more sense to use that. The answer to quesiton 1 is
 
 ```{r}
 #| echo: false
@@ -63,18 +63,20 @@ The answer for question 2 is `r format(num_unique_hospital_ids, big.mark=",")` <
 \newpage
 \noindent 3. What is the distribution of total charges (tot_charges in the data) in each year? Show your results with a “violin” plot, with charges on the y-axis and years on the x-axis.<br>
 
+I filtered out 2007 and 2016 as they are not representative of the whole data. I also scaled it so that the total charges are in millions of dollars. I set an upper limit of 300 to ensure that you can see the widness of each violin. 
+
 ```{r}
 #| echo: false
 #| label: total-charges
 #| fig-cap: totalcharges
 
-tot.charges
+tot.charges2
 ```
 
 \newpage
 \noindent 4. What is the distribution of estimated prices in each year? <br>
 
-I used the equation from class and filtered outliers/negative prices by removing prices lower than 0 and setting a custom upper limit. 
+I used the equation from class and filtered outliers/negative prices by removing prices lower than 0 and greater than 100000, removing 2007 and 2016, and removing hospitals with less than 30 beds. 
 
 ```{r}
 #| echo: false
@@ -132,14 +134,13 @@ knitr::kable(results_table,
 \newpage
 \noindent 8. With these different treatment effect estimators, are the results similar, identical, very different? <br>
 
-The numbers are all identical. This means that even with these different esitmators, the ATE is clearly around 190. This outcome is interesting because that means that all these estimators measured the exact same ATE, although I hypothesized that they would be similar with some variance.  
+The numbers are all identical. This means that even with these different esitmators, the ATE is clearly around 190. This outcome is interesting because that means that all these estimators measured the exact same ATE, which makes sense because the goal is to get the same outcome through different methods. 
 
 
 \newpage
 \noindent 9. Do you think you’ve estimated a causal effect of the penalty? Why or why not? (just a couple of sentences) <br>
 
-I don't think we have established a causal effect because it is just bed size; hosptials of the same bed size could have differing other variables 
-we are using various estimators to find an average treatment effect, not necessarily a causal effect. With ATEs that are statistically significant, we can say there is very high correlation/association, but still it's difficult to say it was directly causal. However, now that all the ATEs are the exact same, I'm wondering if we can say a causal effect because it has been reinforced 4 times. 
+I don't think we have established a causal effect because the only independent variable we had was bed size. Hosptials of the same bed size could have differing other variables, with probably more influence on price, so it would be too much of a jump to say we measured a causal effect. Without controlling for or adding other varaibles, you can't attribute the penalty to bed size alone. 
 
 \newpage
 \noindent 10. Briefly describe your experience working with these data (just a few sentences). Tell me one thing you learned and one thing that really aggravated or surprised you. <br>
@@ -147,4 +148,5 @@ we are using various estimators to find an average treatment effect, not necessa
 This time around, I was definitely more comfortable working with VSCode (Quarto, the setup, etc.), but there were a few hiccups. In the second attempt, moving from submission 1 to submission 2 was a little challenging with making sure my Quarto documents and the workspaces they were accessing were aligned. <br>
 
 I learned how to create violin plots which were not as hard as I thought they'd be. <br>
+
 One thing that aggravated me was figuring out how to call all the variables/graphs/tables into the Quarto document. It took a lot of time to figure out how to correctly call them.  

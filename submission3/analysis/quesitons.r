@@ -63,7 +63,7 @@ duplicate.hcris =
   mutate(time_diff=fy_end-fy_start)
 
 #Question 1: How many hospitals filed more than one report in the same year? Show your answer as a line graph of the number of hospitals over time.
-# Group data by year and count the number of hospitals
+# Group data by year and count the number of hospitals - one way to do it 
 hospital_counts <- duplicate.hcris %>%
   group_by(year = lubridate::year(fy_start)) %>%
   summarise(num_hospitals = n_distinct(provider_number))
@@ -76,7 +76,7 @@ hospital_counts <- duplicate.hcris %>%
   theme_minimal()
   print(hospitals_multreports)
 
-# by fiscal year 
+# by fiscal year antoher way to do it 
 ## Answer Question 1: How many hospitals filed more than one report in the same year? Show your answer as a line graph of the number of hospitals over time.
 
 # Count the number of hospitals that filed more than one report in the same year
@@ -119,28 +119,14 @@ library(ggplot2)
 library(scales)
 
 # Define the custom upper limit for the y-axis
-custom_upper_limit <- 3000
-
-# dividing by 1000000 to show the y axis in total charges scaled 
-tot.charges <- ggplot(final.hcris.data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
-  geom_violin() +
-  labs(title = "Distribution of Total Charges by Year",
-       x = "Year",
-       y = "Total Charges in Millions of Dollars") +
-  theme_minimal() + 
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE), limits = c(0, custom_upper_limit))
-
-print(tot.charges)
-
-# Define the custom upper limit for the y-axis
-custom_upper_limit <- 3000
+custom_upper_limit <- 300
 
 # Filter out data for the year 2007
 filtered_data <- final.hcris.data %>%
-  filter(year != 2007)
+  filter(year != 2007, year !=2016)
 
 # Create the ggplot with the filtered data
-tot.charges <- ggplot(filtered_data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
+tot.charges2 <- ggplot(filtered_data, aes(x = as.factor(year), y = tot_charges / 1e6)) +
   geom_violin() +
   labs(title = "Distribution of Total Charges by Year",
        x = "Year",
@@ -148,7 +134,7 @@ tot.charges <- ggplot(filtered_data, aes(x = as.factor(year), y = tot_charges / 
   theme_minimal() + 
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE), limits = c(0, custom_upper_limit))
 
-print(tot.charges)
+print(tot.charges2)
 
 
 
@@ -166,7 +152,7 @@ final.hcris.data <- final.hcris.data %>%
 
 # Filter out negative prices and extreme outliers and add penalty data
 final.hcris.data <- final.hcris.data %>% ungroup() %>%
-  filter(year != 2007, price_denom>100, !is.na(price_denom), 
+  filter(year !=2016, year != 2007, price_denom>100, !is.na(price_denom), 
          price_num>0, !is.na(price_num),
          price<100000, 
          beds>30) %>%  
